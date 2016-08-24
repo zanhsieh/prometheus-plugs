@@ -10,7 +10,6 @@ defmodule Utils do
   end
   def response_size(%{resp_body: resp_body, status: 200, state: :set}) do
     resp_body
-    |> List.to_string
     |> String.length
   end
   def response_size(_), do: 0
