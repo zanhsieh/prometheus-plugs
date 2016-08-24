@@ -91,6 +91,12 @@ defmodule Prometheus.PlugsInstrumenter do
                                    help: "The HTTP request latencies in microseconds.",
                                    labels: labels,
                                    buckets: request_duration_buckets], registry)
+    :prometheus_counter.declare([name: :http_requests_size,
+                                 help: "Total size in bytes of HTTP requests made.",
+                                 labels: labels], registry)
+    :prometheus_counter.declare([name: :http_responses_size,
+                                 help: "Total size in bytes of HTTP responses made.",
+                                 labels: labels], registry)
   end
 
   def init(labels) do
@@ -112,7 +118,11 @@ defmodule Prometheus.PlugsInstrumenter do
 
     Conn.register_before_send(conn, fn conn ->
       labels = construct_labels(labels, conn)
+      req_size = conn |> Utils.request_size |> Integer.to_string
+      resp_size = conn |> Utils.response_size |> Integer.to_string
       :prometheus_counter.inc(Config.registry, :http_requests_total, labels, 1)
+      :prometheus_counter.inc(Config.registry, :http_requests_size, labels, req_size)
+      :prometheus_counter.inc(Config.registry, :http_responses_size, labels, resp_size)
 
       stop = current_time()
       diff = time_diff(start, stop)
