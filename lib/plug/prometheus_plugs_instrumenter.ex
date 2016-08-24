@@ -118,8 +118,8 @@ defmodule Prometheus.PlugsInstrumenter do
 
     Conn.register_before_send(conn, fn conn ->
       labels = construct_labels(labels, conn)
-      req_size = conn |> Utils.request_size |> Integer.to_string
-      resp_size = conn |> Utils.response_size |> Integer.to_string
+      req_size = conn |> Utils.request_size
+      resp_size = conn |> Utils.response_size
       :prometheus_counter.inc(Config.registry, :http_requests_total, labels, 1)
       :prometheus_counter.inc(Config.registry, :http_requests_size, labels, req_size)
       :prometheus_counter.inc(Config.registry, :http_responses_size, labels, resp_size)
